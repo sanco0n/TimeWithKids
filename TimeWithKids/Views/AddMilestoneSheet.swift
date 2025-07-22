@@ -26,6 +26,8 @@ struct AddMilestoneSheet: View {
                             .keyboardType(.numberPad)
                     } else {
                         DatePicker("予定日", selection: $targetDate, displayedComponents: .date)
+                            .datePickerStyle(.wheel)
+                            .environment(\.locale, Locale(identifier: "ja_JP"))
                     }
                 }
             }

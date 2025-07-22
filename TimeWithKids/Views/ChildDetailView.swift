@@ -78,6 +78,7 @@ struct MilestoneRowView: View {
     private var formattedTargetDate: String {
         guard let date = targetDate else { return "-" }
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }

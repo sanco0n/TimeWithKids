@@ -16,6 +16,8 @@ struct EditChildSheet: View {
                     TextField("名前", text: $child.name)
                         .focused($isNameFocused)
                     DatePicker("誕生日", selection: $child.birthday, displayedComponents: .date)
+                        .datePickerStyle(.wheel)
+                        .environment(\.locale, Locale(identifier: "ja_JP"))
                 } header: {
                     Text("子供情報を編集")
                 }

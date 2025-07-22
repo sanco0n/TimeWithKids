@@ -50,7 +50,6 @@ struct ContentView: View {
             AddChildSheet(
                 name: $name,
                 birthday: $birthday,
-                targetAge: $targetAge,
                 onAdd: {
                     addChild()
                     showAddSheet = false
@@ -121,7 +120,6 @@ struct ContentView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             if let idx = children.firstIndex(where: { $0.id == child.id }) {
-                                // 一度nilにしてから再セットで確実に遷移
                                 if selectedChildIndex == idx {
                                     selectedChildIndex = nil
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -225,11 +223,9 @@ struct ContentView: View {
 struct AddChildSheet: View {
     @Binding var name: String
     @Binding var birthday: Date
-    @Binding var targetAge: String
     var onAdd: () -> Void
     var onCancel: () -> Void
     @FocusState private var isNameFocused: Bool
-    @FocusState private var isTargetAgeFocused: Bool
     
     var body: some View {
         NavigationView {
@@ -237,7 +233,6 @@ struct AddChildSheet: View {
                 AddChildForm(
                     name: $name,
                     birthday: $birthday,
-                    targetAge: $targetAge,
                     onAdd: onAdd
                 )
                 Spacer()
@@ -246,12 +241,10 @@ struct AddChildSheet: View {
             .navigationBarItems(
                 leading: Button("キャンセル") {
                     isNameFocused = false
-                    isTargetAgeFocused = false
                     onCancel()
                 },
                 trailing: Button("追加") {
                     isNameFocused = false
-                    isTargetAgeFocused = false
                     onAdd()
                 }
             )

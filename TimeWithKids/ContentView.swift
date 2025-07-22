@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var alertMessage = ""
     @State private var showAddSheet = false
     @FocusState private var isAnyFieldFocused: Bool
+    @State private var selectedChildIndex: Int? = nil
 
     var body: some View {
         NavigationView {
@@ -85,43 +86,25 @@ struct ContentView: View {
     }
     
     private var titleSection: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.7))
-                    .frame(width: 54, height: 54)
-                    .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
-                Image(systemName: "clock.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 32, height: 32)
-                    .foregroundColor(Color.blue)
-            }
+        VStack(spacing: 0) {
             Text("子供との時間")
-                .font(.system(size: 30, weight: .bold, design: .rounded))
-                .foregroundColor(Color.blue)
-            Spacer()
+                .font(.system(size: 36, weight: .heavy, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.blue, Color.purple, Color.pink],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .multilineTextAlignment(.center)
+                .padding(.top, 32)
+                .padding(.bottom, 12)
         }
-        .padding(.top, 12)
-        .padding(.leading, 8)
+        .frame(maxWidth: .infinity)
     }
     
     private var addButtonSection: some View {
-        HStack {
-            Spacer()
-            Button(action: {
-                showAddSheet = true
-            }) {
-                Label("追加", systemImage: "plus.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-                    .padding(8)
-                    .background(Color.white.opacity(0.85))
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 2)
-            }
-            Spacer()
-        }
+        EmptyView() // 追加ボタンはリストセクション内に移動
     }
     
     private var childrenListSection: some View {
@@ -129,33 +112,63 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: 22)
                 .fill(Color.white.opacity(0.7))
                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-            List {
-                ForEach(children) { child in
-                    ChildRowView(child: child) {
-                        editingChild = child
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showAddSheet = true
+                    }) {
+                        Label("子供を追加", systemImage: "plus.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.blue)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color.white.opacity(0.95))
+                            .cornerRadius(16)
+                            .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 2)
                     }
-                    .listRowBackground(Color.clear)
+                    Spacer()
                 }
-                .onDelete(perform: deleteChild)
+                .padding(.top, 12)
+                .padding(.bottom, 4)
+                Text("子供情報を長押しで編集できます")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 4)
+                List {
+                    ForEach(children, id: \.id) { child in
+                        ChildRowView(child: child) {
+                            editingChild = child
+                        }
+                        .onTapGesture {
+                            if let idx = children.firstIndex(where: { $0.id == child.id }) {
+                                selectedChildIndex = idx
+                            }
+                        }
+                        .listRowBackground(Color.clear)
+                    }
+                    .onDelete(perform: deleteChild)
+                }
+                .background(Color.clear)
+                .listStyle(PlainListStyle())
             }
-            .background(Color.clear)
-            .listStyle(PlainListStyle())
         }
         .padding([.horizontal, .bottom])
         .frame(maxHeight: .infinity)
+        .sheet(isPresented: Binding<Bool>(
+            get: { selectedChildIndex != nil },
+            set: { if !$0 { selectedChildIndex = nil } }
+        )) {
+            if let idx = selectedChildIndex {
+                ChildDetailView(child: $children[idx])
+            }
+        }
     }
     
     // MARK: - Business Logic
     private func addChild() {
-        guard let age = Int(targetAge), !name.isEmpty else { return }
-        
-        if !DateCalculator.isValidTargetAge(birthday: birthday, targetAge: age) {
-            alertMessage = "目標年齢は現在の年齢以上にしてください。"
-            showAlert = true
-            return
-        }
-        
-        let newChild = Child(name: name, birthday: birthday, targetAge: age)
+        guard !name.isEmpty else { return }
+        let newChild = Child(name: name, birthday: birthday)
         children.append(newChild)
         saveChildren()
         clearForm()
@@ -167,12 +180,6 @@ struct ContentView: View {
     }
     
     private func handleChildUpdate(_ updatedChild: Child) {
-        if !DateCalculator.isValidTargetAge(birthday: updatedChild.birthday, targetAge: updatedChild.targetAge) {
-            alertMessage = "目標年齢は現在の年齢以上にしてください。"
-            showAlert = true
-            return
-        }
-        
         if let idx = children.firstIndex(where: { $0.id == updatedChild.id }) {
             children[idx] = updatedChild
             saveChildren()

@@ -50,7 +50,7 @@ struct MilestoneRowView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(milestone.title)
                 .font(.headline)
-            Text("目標日: " + formattedTargetDate)
+            Text("予定日: " + formattedTargetDate)
                 .font(.subheadline)
                 .foregroundColor(.gray)
             Text("残り: " + timeLeftString)

@@ -113,6 +113,32 @@ struct ContentView: View {
                 .fill(Color.white.opacity(0.7))
                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
             VStack(spacing: 0) {
+                List {
+                    ForEach(children, id: \.id) { child in
+                        ChildRowView(child: child) {
+                            editingChild = child
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if let idx = children.firstIndex(where: { $0.id == child.id }) {
+                                // 一度nilにしてから再セットで確実に遷移
+                                if selectedChildIndex == idx {
+                                    selectedChildIndex = nil
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        selectedChildIndex = idx
+                                    }
+                                } else {
+                                    selectedChildIndex = idx
+                                }
+                            }
+                        }
+                        .listRowBackground(Color.clear)
+                    }
+                    .onDelete(perform: deleteChild)
+                }
+                .background(Color.clear)
+                .listStyle(PlainListStyle())
+                Spacer(minLength: 8)
                 HStack {
                     Spacer()
                     Button(action: {
@@ -129,28 +155,11 @@ struct ContentView: View {
                     }
                     Spacer()
                 }
-                .padding(.top, 12)
-                .padding(.bottom, 4)
+                .padding(.top, 8)
                 Text("子供情報を長押しで編集できます")
                     .font(.caption)
                     .foregroundColor(.gray)
-                    .padding(.bottom, 4)
-                List {
-                    ForEach(children, id: \.id) { child in
-                        ChildRowView(child: child) {
-                            editingChild = child
-                        }
-                        .onTapGesture {
-                            if let idx = children.firstIndex(where: { $0.id == child.id }) {
-                                selectedChildIndex = idx
-                            }
-                        }
-                        .listRowBackground(Color.clear)
-                    }
-                    .onDelete(perform: deleteChild)
-                }
-                .background(Color.clear)
-                .listStyle(PlainListStyle())
+                    .padding(.bottom, 12)
             }
         }
         .padding([.horizontal, .bottom])
@@ -158,7 +167,7 @@ struct ContentView: View {
         .sheet(isPresented: Binding<Bool>(
             get: { selectedChildIndex != nil },
             set: { if !$0 { selectedChildIndex = nil } }
-        )) {
+        ), onDismiss: { selectedChildIndex = nil }) {
             if let idx = selectedChildIndex {
                 ChildDetailView(child: $children[idx])
             }

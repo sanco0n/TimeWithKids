@@ -22,10 +22,10 @@ struct AddMilestoneSheet: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     if type == .age {
-                        TextField("目標年齢", text: $targetAge)
+                        TextField("予定年齢", text: $targetAge)
                             .keyboardType(.numberPad)
                     } else {
-                        DatePicker("目標日付", selection: $targetDate, displayedComponents: .date)
+                        DatePicker("予定日", selection: $targetDate, displayedComponents: .date)
                     }
                 }
             }

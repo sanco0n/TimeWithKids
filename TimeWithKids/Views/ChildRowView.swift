@@ -26,7 +26,6 @@ struct ChildRowView: View {
             Text("\(child.name)")
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
             Spacer()
-            editButton
         }
         .padding(.bottom, 2)
     }
@@ -41,19 +40,6 @@ struct ChildRowView: View {
                 .scaledToFit()
                 .frame(width: 20, height: 20)
                 .foregroundColor(Color.blue)
-        }
-    }
-    
-    private var editButton: some View {
-        Group {
-            if let onEdit = onEdit {
-                Button(action: {
-                    onEdit()
-                }) {
-                    Image(systemName: "pencil")
-                        .foregroundColor(.green)
-                }
-            }
         }
     }
     
